@@ -1,3 +1,4 @@
+import { ClerkProvider } from "@clerk/nextjs";
 import { Inter } from "next/font/google";
 
 export const metadata = {
@@ -11,9 +12,11 @@ const inter = Inter({
 
 const AuthLayout = ({ children }: { children: React.ReactNode }) => {
 	return (
-		<html lang="en">
-			<body className={`${inter.className} bg-dark-1 `}>{children}</body>
-		</html>
+		<ClerkProvider>
+			<html lang="en">
+				<body className={`${inter.className} bg-dark-1 `}>{children}</body>
+			</html>
+		</ClerkProvider>
 	);
 };
 
