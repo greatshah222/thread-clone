@@ -11,7 +11,6 @@ import { Button } from "@/components/ui/button";
 import {
 	Form,
 	FormControl,
-	FormDescription,
 	FormField,
 	FormItem,
 	FormLabel,
@@ -21,6 +20,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { isBase64Image } from "@/lib/utils";
 import { useUploadThing } from "@/lib/uploadthing";
+import { updateUser } from "@/lib/actions/user.actions";
+import { usePathname, useRouter } from "next/navigation";
 
 interface AccountProfileProps {
 	user: {
@@ -36,6 +37,8 @@ interface AccountProfileProps {
 const AccountProfile: React.FC<AccountProfileProps> = ({ user, btnTitle }) => {
 	const [files, setFiles] = useState<File[]>([]);
 	const { startUpload } = useUploadThing("media");
+	const pathname = usePathname();
+	const router = useRouter();
 	const form = useForm({
 		resolver: zodResolver(UserValidation),
 		defaultValues: {
@@ -46,24 +49,6 @@ const AccountProfile: React.FC<AccountProfileProps> = ({ user, btnTitle }) => {
 		},
 	});
 
-	async function onSubmit(values: z.infer<typeof UserValidation>) {
-		// Do something with the form values.
-		// ✅ This will be type-safe and validated.
-		console.log(values);
-
-		const blob = values.profile_photo;
-
-		const hasImageChanged = isBase64Image(blob);
-		if (hasImageChanged) {
-			const imgRes = await startUpload(files);
-
-			if (imgRes && imgRes[0]?.fileUrl) {
-				values.profile_photo = imgRes[0]?.fileUrl; // modifying react hook state directly
-			}
-		}
-
-		// TODO UPDATE USER PROFILE
-	}
 	const handleImage = (e: ChangeEvent<HTMLInputElement>, fieldChange: (value: string) => void) => {
 		e.preventDefault();
 
@@ -82,6 +67,39 @@ const AccountProfile: React.FC<AccountProfileProps> = ({ user, btnTitle }) => {
 			fileReader.readAsDataURL(file);
 		}
 	};
+	async function onSubmit(values: z.infer<typeof UserValidation>) {
+		// Do something with the form values.
+		// ✅ This will be type-safe and validated.
+		console.log(values);
+
+		const blob = values.profile_photo;
+
+		const hasImageChanged = isBase64Image(blob);
+		if (hasImageChanged) {
+			const imgRes = await startUpload(files);
+
+			if (imgRes && imgRes[0]?.fileUrl) {
+				values.profile_photo = imgRes[0]?.fileUrl; // modifying react hook state directly
+			}
+		}
+
+		// TODO UPDATE USER PROFILE
+
+		await updateUser({
+			username: values.username,
+			userId: user.id,
+			name: values.name,
+			bio: values.bio,
+			image: values.profile_photo,
+			path: pathname,
+		});
+
+		if (pathname === "/profile/edit") {
+			router.back();
+		} else {
+			router.push("/");
+		}
+	}
 	return (
 		<Form {...form}>
 			<form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col justify-start gap-10">
@@ -119,6 +137,7 @@ const AccountProfile: React.FC<AccountProfileProps> = ({ user, btnTitle }) => {
 									onChange={(e) => handleImage(e, field.onChange)}
 								/>
 							</FormControl>
+							<FormMessage />
 						</FormItem>
 					)}
 				/>
@@ -131,6 +150,7 @@ const AccountProfile: React.FC<AccountProfileProps> = ({ user, btnTitle }) => {
 							<FormControl className="">
 								<Input type="text" className="account-form_input no-focus" {...field} />
 							</FormControl>
+							<FormMessage />
 						</FormItem>
 					)}
 				/>
@@ -143,6 +163,7 @@ const AccountProfile: React.FC<AccountProfileProps> = ({ user, btnTitle }) => {
 							<FormControl className="">
 								<Input type="text" className="account-form_input no-focus" {...field} />
 							</FormControl>
+							<FormMessage />
 						</FormItem>
 					)}
 				/>
@@ -155,6 +176,7 @@ const AccountProfile: React.FC<AccountProfileProps> = ({ user, btnTitle }) => {
 							<FormControl className="">
 								<Textarea className="account-form_input no-focus" rows={10} {...field} />
 							</FormControl>
+							<FormMessage />
 						</FormItem>
 					)}
 				/>
