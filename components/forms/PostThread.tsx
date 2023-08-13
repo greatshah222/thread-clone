@@ -4,12 +4,12 @@ import { usePathname, useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { useOrganization } from "@clerk/nextjs";
 
 import { Button } from "@/components/ui/button";
 import {
 	Form,
 	FormControl,
-	FormDescription,
 	FormField,
 	FormItem,
 	FormLabel,
@@ -22,6 +22,8 @@ import { createThread } from "@/lib/actions/thread.action";
 const PostThread = ({ userId }: { userId: string }) => {
 	const pathname = usePathname();
 	const router = useRouter();
+	const { organization } = useOrganization();
+	console.log("organization", organization);
 
 	const form = useForm({
 		resolver: zodResolver(ThreadValidation),
@@ -36,9 +38,10 @@ const PostThread = ({ userId }: { userId: string }) => {
 			text: values.thread,
 
 			author: userId,
-			communityId: null,
+			communityId: organization ? organization?.id : null,
 			path: pathname,
 		});
+
 		router.push("/");
 	}
 	return (
