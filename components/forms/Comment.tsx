@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { CommentValidation } from "@/lib/validations/thread";
-import { addCommentToThread, createThread } from "@/lib/actions/thread.action";
+import { addCommentToThread } from "@/lib/actions/thread.action";
 import Image from "next/image";
 
 interface CommentProps {
@@ -40,7 +40,6 @@ const Comment = ({ threadId, currentuserImg, currentuserId }: CommentProps) => {
 		await addCommentToThread(threadId, values.thread, JSON.parse(currentuserId), pathname);
 
 		form.reset();
-		router.push("/");
 	}
 	return (
 		<Form {...form}>

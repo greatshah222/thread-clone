@@ -15,7 +15,9 @@ const AuthLayout = ({ children }: { children: React.ReactNode }) => {
 	return (
 		<ClerkProvider>
 			<html lang="en">
-				<body className={`${inter.className} bg-dark-1`}>{children}</body>
+				<body className={`${inter.className} bg-dark-1`}>
+					<div className="flex justify-center items-center min-h-screen w-full ">{children}</div>
+				</body>
 			</html>
 		</ClerkProvider>
 	);
